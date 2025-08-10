@@ -1,46 +1,32 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanilla-calendar-pro@latest/dist/vanilla-calendar.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/vanilla-calendar-pro@latest/dist/vanilla-calendar.min.js"></script>
-    <div id="calendar"></div>
-    <p>Vybrané datum: <span id="vybrane-datum-text">zatím nevybráno</span></p>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rezervace návštěvy u mě na Erasmu</title>
-    
+    <title>Rezervace návštěvy</title>
     <link href="https://cdn.jsdelivr.net/npm/vanilla-js-calendar@1.1.5/build/vanilla-js-calendar.min.css" rel="stylesheet">
-    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <h1>Zarezervuj si návštěvu!</h1>
     <p>Vyber si počáteční den a počet nocí, které chceš zůstat.</p>
-    
     <div id="loading">Načítám kalendář...</div>
-
-    <div id="calendar" class="vanilla-js-calendar"></div>
-
+    <div id="calendar-wrapper">
+        <div id="calendar" class="vanilla-js-calendar"></div>
+    </div>
     <form id="booking-form">
         <h2>Nová rezervace</h2>
-        
         <input type="hidden" id="datum" name="datum" readonly>
         <p>Vybrané datum: <strong id="vybrane-datum-text">zatím nevybráno</strong></p>
-
         <label for="pocetDni">Počet nocí:</label>
         <input type="number" id="pocetDni" name="pocetDni" min="1" max="14" required>
-
         <label for="jmeno">Tvoje jméno:</label>
         <input type="text" id="jmeno" name="jmeno" required>
-
         <label for="poznamka">Poznámka (nepovinné):</label>
         <textarea id="poznamka" name="poznamka"></textarea>
-
         <button type="submit">Zarezervovat</button>
     </form>
-
     <div id="message"></div>
-
     <script src="https://cdn.jsdelivr.net/npm/vanilla-js-calendar@1.1.5/build/vanilla-js-calendar.min.js"></script>
     <script src="script.js"></script>
 </body>
