@@ -1,7 +1,14 @@
-// !!! ZDE VLOŽ URL ADRESU SVÉ NASAZENÉ WEB APP Z GOOGLE APPS SCRIPT !!!
-const googleWebAppUrl = 'https://script.google.com/macros/s/AKfycbxqVUB40EVaiWfQHpH0LxykZGL_Oq2NQZnKg27iJYiT2wvgim3vihLrA8KlkRIFOhaa/exec';
+// ====== NASTAVENÍ PRO AIRTABLE ======
+// !!! VLOŽ SEM SVÉ ÚDAJE Z AIRTABLE !!!
+const AIRTABLE_API_KEY = "patXJUnA9n4shEsWt.06015dff5f2770902945669b6f28e8271ad3a6a68ada79bfefe0ea1cc12730f7"; // Začíná na "pat..."
+const AIRTABLE_BASE_ID = "appYNqXYyPHJb9DDl";           // Začíná na "app..."
+const AIRTABLE_TABLE_NAME = "Rezervace";
 
-// Reference na HTML elementy, se kterými budeme pracovat
+// Sestavení URL adresy pro API
+const airtableUrl = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}`;
+
+
+// Reference na HTML elementy
 const form = document.getElementById('booking-form');
 const messageDiv = document.getElementById('message');
 const loadingDiv = document.getElementById('loading');
@@ -13,127 +20,108 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchBookings();
 });
 
-/**
- * Funkce pro načtení rezervací a následné vytvoření kalendáře.
- */
+// Zcela nová funkce pro načtení rezervací z Airtable
 async function fetchBookings() {
+    loadingDiv.innerText = 'Načítám kalendář...';
     try {
-        const response = await fetch(googleWebAppUrl);
-        if (!response.ok) throw new Error('Chyba při komunikaci se serverem.');
+        const response = await fetch(airtableUrl, {
+            headers: {
+                'Authorization': `Bearer ${AIRTABLE_API_KEY}`
+            }
+        });
+        if (!response.ok) throw new Error('Chyba při komunikaci s Airtable.');
         
-        const bookings = await response.json();
+        const data = await response.json();
+        const bookings = data.records.map(record => record.fields);
         
-        // Zpracujeme rezervace a vytvoříme pole všech obsazených dnů
         const disabledDates = [];
         bookings.forEach(booking => {
+            if (!booking.datumZacatku || !booking.pocetDni) return;
             const startDate = new Date(booking.datumZacatku);
             const nights = parseInt(booking.pocetDni, 10);
-            
-            // Přidáme všechny dny rezervace do pole neaktivních dat
             for (let i = 0; i < nights; i++) {
                 const day = new Date(startDate);
                 day.setDate(startDate.getDate() + i);
-                // Formát YYYY-MM-DD
                 disabledDates.push(day.toISOString().split('T')[0]); 
             }
         });
 
-        // Schováme načítací hlášku
         loadingDiv.style.display = 'none';
-        
-        // Nyní, když máme obsazená data, vytvoříme kalendář
         initializeCalendar(disabledDates);
         
     } catch (error) {
         console.error('Nepodařilo se načíst rezervace:', error);
-        loadingDiv.innerText = 'Chyba: Nepodařilo se načíst data z kalendáře.';
+        loadingDiv.innerText = `Chyba: ${error.message}`;
     }
 }
 
-/**
- * Funkce, která vytvoří a nastaví interaktivní kalendář.
- * @param {string[]} disabledDates - Pole dat ve formátu 'YYYY-MM-DD', která mají být neaktivní.
- */
-function initializeCalendar(disabledDates) {
-    const options = {
-        // Nastavení jazyka a formátování
-        settings: {
-            lang: 'cs', // Čeština
-            visibility: {
-                // Zobrazíme pouze dny v aktuálním měsíci a zakážeme minulé dny
-                daysOutside: false,
-                disabled: true, 
-            },
-        },
-        // Data, která mají být zakázaná
-        dates: {
-            disabled: disabledDates,
-        },
-        // Co se stane, když uživatel klikne na den
-        actions: {
-            clickDay(event, self) {
-                // Získáme datum, na které bylo kliknuto
-                const selectedDate = self.selectedDates[0];
-                if (!selectedDate) return;
-
-                // Uložíme datum do skrytého pole ve formuláři
-                datumInput.value = selectedDate;
-                
-                // Zobrazíme datum uživateli
-                vybraneDatumText.textContent = new Date(selectedDate).toLocaleDateString('cs-CZ');
-                vybraneDatumText.style.fontWeight = 'bold';
-            },
-        },
-    };
-
-    // Vytvoříme novou instanci kalendáře a inicializujeme ji
-    const calendar = new VanillaCalendar('#calendar', options);
-    calendar.init();
-}
-
-
-// Funkce pro odeslání formuláře zůstává téměř stejná
+// Funkce pro odeslání formuláře do Airtable
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
-
-    const formData = new FormData(form);
-    const dataToSend = {
-        datumZacatku: formData.get('datum'),
-        pocetDni: formData.get('pocetDni'),
-        jmeno: formData.get('jmeno'),
-        poznamka: formData.get('poznamka')
-    };
-
-    // Zkontrolujeme, zda bylo vybráno datum
-    if (!dataToSend.datumZacatku) {
+    if (!datumInput.value) {
         showMessage('Prosím, vyber datum z kalendáře.', 'error');
         return;
     }
     
+    const dataToSend = {
+        fields: {
+            jmeno: document.getElementById('jmeno').value,
+            datumZacatku: document.getElementById('datum').value,
+            pocetDni: parseInt(document.getElementById('pocetDni').value, 10),
+            poznamka: document.getElementById('poznamka').value
+        }
+    };
+    
     showMessage('Odesílám rezervaci...', 'info');
 
     try {
-        const response = await fetch(googleWebAppUrl, {
+        const response = await fetch(airtableUrl, {
             method: 'POST',
-            body: JSON.stringify(dataToSend),
+            headers: {
+                'Authorization': `Bearer ${AIRTABLE_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dataToSend)
         });
-        const result = await response.json();
 
-        if (result.status === "OK") {
-            showMessage(result.message, 'success');
-            form.reset();
-            vybraneDatumText.textContent = 'zatím nevybráno';
-            vybraneDatumText.style.fontWeight = 'normal';
-            // Po úspěšné rezervaci znovu načteme kalendář s aktualizovanými daty
-            fetchBookings();
-        } else {
-            throw new Error(result.message);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error.message);
         }
+
+        showMessage('Rezervace úspěšně uložena.', 'success');
+        form.reset();
+        vybraneDatumText.textContent = 'zatím nevybráno';
+        fetchBookings(); // Znovu načteme kalendář
     } catch (error) {
         showMessage(`Chyba: ${error.message}`, 'error');
     }
 });
 
+
+// Funkce pro kalendář a zprávy zůstávají stejné...
+function initializeCalendar(disabledDates) { /* ... beze změny ... */ }
+function showMessage(text, type) { /* ... beze změny ... */ }
+
+// Vlož sem těla funkcí initializeCalendar a showMessage z našeho předchozího kódu
+// (nebo je tam nech, pokud jsi je z `script.js` nesmazal)
+function initializeCalendar(disabledDates) {
+    const options = {
+        settings: { lang: 'cs', visibility: { daysOutside: false, disabled: true } },
+        dates: { disabled: disabledDates },
+        actions: {
+            clickDay(event, self) {
+                const selectedDate = self.selectedDates[0];
+                if (!selectedDate) return;
+                datumInput.value = selectedDate;
+                vybraneDatumText.textContent = new Date(selectedDate).toLocaleDateString('cs-CZ');
+                vybraneDatumText.style.fontWeight = 'bold';
+            },
+        },
+    };
+    const calendar = new VanillaCalendar('#calendar', options);
+    calendar.init();
+}
 function showMessage(text, type) {
     messageDiv.textContent = text;
     messageDiv.className = type;
