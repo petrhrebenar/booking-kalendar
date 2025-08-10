@@ -2,7 +2,7 @@
 
 // ====== NASTAVENÍ PRO AIRTABLE ======
 // !!! VLOŽ SEM SVÉ ÚDAJE Z AIRTABLE !!!
-const AIRTABLE_API_KEY = "patXJUnA9n4shEsWt.06015dff5f2770902945669b6f28e8271ad3a6a68ada79bfefe0ea1cc12730f7"; // Začíná na "pat..."
+const AIRTABLE_API_KEY = "pat6cpH1mJtVP0PXy.335bc3a071855f59dbeedd09cf235284397ee36ce000a1292297a5fd87be4020"; // Začíná na "pat..."
 const AIRTABLE_BASE_ID = "appYNqXYyPHJb9DDl";           // Začíná na "app..."
 const AIRTABLE_TABLE_NAME = "Rezervace";
 
