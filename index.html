@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rezervace návštěvy u mě na Erasmu</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Zarezervuj si návštěvu!</h1>
+    <p>Vyber si počáteční den a počet nocí, které chceš zůstat.</p>
+    
+    <div id="loading">Načítám kalendář...</div>
+
+    <div class="calendar-container">
+        </div>
+
+    <form id="booking-form">
+        <h2>Nová rezervace</h2>
+        <label for="datum">Vybrané datum:</label>
+        <input type="text" id="datum" name="datum" readonly>
+
+        <label for="pocetDni">Počet nocí:</label>
+        <input type="number" id="pocetDni" name="pocetDni" min="1" max="14" required>
+
+        <label for="jmeno">Tvoje jméno:</label>
+        <input type="text" id="jmeno" name="jmeno" required>
+
+        <label for="poznamka">Poznámka (nepovinné):</label>
+        <textarea id="poznamka" name="poznamka"></textarea>
+
+        <button type="submit">Zarezervovat</button>
+    </form>
+
+    <div id="message"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
