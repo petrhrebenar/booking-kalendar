@@ -1,5 +1,5 @@
 // !!! ZDE VLOŽ URL ADRESU SVÉ NASAZENÉ WEB APP Z GOOGLE APPS SCRIPT !!!
-const googleWebAppUrl = 'https://script.google.com/macros/s/AKfycbztGuUsfCvtNl9A5BdgGlaGqRP0swqEiNTCCJWKDoztuICjLYKYU7Nyfnh_IiEXiYiz/exec';
+const googleWebAppUrl = 'https://script.google.com/macros/s/AKfycbw7lzCIWp4RkWuA0fgGB0hgukXkEd_lPgXYoWJfE9_WNuxfuWXswODLWS5L7t93Njz1/exec';
 
 // Reference na HTML elementy, se kterými budeme pracovat
 const form = document.getElementById('booking-form');
